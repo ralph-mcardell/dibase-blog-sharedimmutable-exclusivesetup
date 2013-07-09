@@ -1,0 +1,26 @@
+# Source dependency files
+*.d
+
+# Compiled Object files
+*.slo
+*.lo
+*.o
+
+# Compiled Dynamic libraries
+*.so
+
+# Compiled Static libraries
+*.lai
+*.la
+*.a
+
+# Temporary files
+*.tmp
+*.temp
+
+# Backup files
+*~
+
+# Built executables
+bin
+test
