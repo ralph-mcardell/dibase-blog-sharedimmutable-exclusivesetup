@@ -4,7 +4,7 @@
 ///
 /// Code accompanying the 
 /// "Comments on comments to Herb Sutter's updated GotW #6b solution" series of
-/// Dibase blog postings/
+/// Dibase blog postings.
 ///
 /// An example type template that uses call context validation to enforce the 
 /// Shared Immutable Exclusive Setup pattern that can be used to create classes
