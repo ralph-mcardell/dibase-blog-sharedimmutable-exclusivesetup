@@ -30,6 +30,7 @@ clean: tidy
 	-$(RM) $(LIB_DIR)/*.a
 	-$(RM) $(DEP_FILES)
 	-$(RM) *.d.*
+	-$(RM) *~
 
 $(TGT_FILE): $(OBJ_FILES)
 	$(AR) $(AR_FLAGS) $(TGT_FILE) $(OBJ_FILES)

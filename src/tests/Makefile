@@ -66,6 +66,7 @@ clean: tidy
 	-$(RM) $(TGT_FILES_DEBUG)
 	-$(RM) $(DEP_FILES)
 	-$(RM) *.d.*
+	-$(RM) *~
 
 lib:
 	$(MAKE) -C $(SRC_DIR) BUILD_CONFIG=$(BUILD_CONFIG) 
