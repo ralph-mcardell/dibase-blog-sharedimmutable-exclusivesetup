@@ -34,7 +34,7 @@ TEST_CASE("blog/sies/atomic-policies/atomic/relaxed/create,store,load"
          )
 {
   test_type orig;
-  memory_order<std::memory_order_relaxed>::atomic<test_type_ptr> v{&orig};
+  atomic<test_type_ptr,std::memory_order_relaxed> v{&orig};
   CHECK(v.load()==&orig);
   test_type other;
   v.store(&other);
@@ -46,7 +46,7 @@ TEST_CASE("blog/sies/atomic-policies/atomic/seq_cst/create,store,load"
          )
 {
   test_type orig;
-  memory_order<std::memory_order_seq_cst>::atomic<test_type_ptr> v{&orig};
+  atomic<test_type_ptr,std::memory_order_seq_cst> v{&orig};
   CHECK(v.load()==&orig);
   test_type other;
   v.store(&other);
@@ -58,7 +58,7 @@ TEST_CASE("blog/sies/atomic-policies/atomic/release_acquire/create,store,load"
          )
 {
   test_type orig;
-  memory_order<std::memory_order_release,std::memory_order_acquire>::atomic<test_type_ptr> v{&orig};
+  atomic<test_type_ptr,std::memory_order_release,std::memory_order_acquire> v{&orig};
   CHECK(v.load()==&orig);
   test_type other;
   v.store(&other);
@@ -70,7 +70,7 @@ TEST_CASE("blog/sies/atomic-policies/atomic/release_consume/create,store,load"
          )
 {
   test_type orig;
-  memory_order<std::memory_order_release,std::memory_order_consume>::atomic<test_type_ptr> v{&orig};
+  atomic<test_type_ptr,std::memory_order_release,std::memory_order_consume> v{&orig};
   CHECK(v.load()==&orig);
   test_type other;
   v.store(&other);

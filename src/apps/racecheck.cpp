@@ -100,25 +100,13 @@ public:
   }
 };
 
-typedef memory_order<std::memory_order_seq_cst>
-        mem_order_seq_cst;
-
-typedef memory_order<std::memory_order_release,std::memory_order_acquire>
-        mem_order_rel_acq;
-
-typedef memory_order<std::memory_order_release,std::memory_order_consume>
-        mem_order_rel_consume;
-
-typedef memory_order<std::memory_order_relaxed>
-        mem_order_relaxed;
-
 typedef std::unique_ptr<task>             task_ptr;
 
 // Unsynchronised access type aliases - should produce some race condition
 // problems but seem not to on x86-64 VMWare 9 VM having 2 processors with 4
 // cores each running x86-64 Linux, g++ 4.6.3 on a 2*Opteron 4334 Windows 8 host
-typedef text_registry<non_atomic>       text_registry_type;
-typedef non_atomic<text_registry_type*> text_registry_ptr;
+//typedef text_registry<non_atomic>       text_registry_type;
+//typedef non_atomic<text_registry_type*> text_registry_ptr;
 
 // Synchronised access type aliases. In theory should create no race conditions.
 // Creator thread atomically writing to text_registry_ptr should be sufficient
@@ -126,8 +114,11 @@ typedef non_atomic<text_registry_type*> text_registry_ptr;
 // updates are to memory associated with the one object and its pointer, so
 // a store-release followed by a consume-load should allow readers to see
 // all writes to the object by the creator thread _after_ the store-release.
-//typedef text_registry<mem_order_rel_consume::atomic>     text_registry_type;
-//typedef mem_order_relaxed::atomic<text_registry_type*>   text_registry_ptr;
+typedef text_registry
+          < atomic
+          , std::memory_order_release
+          , std::memory_order_consume >                       text_registry_type;
+typedef atomic<text_registry_type*,std::memory_order_relaxed> text_registry_ptr;
 
 void reader(logger & log, text_info const * p_reference, text_registry_ptr& p_data);
 

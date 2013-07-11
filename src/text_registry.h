@@ -17,14 +17,31 @@
 # define DIBASE_BLOG_SIES_TEXT_REGISRTY_H
 # include "call_context_validator.h"
 # include "text_info.h"
+# include <atomic>
 
 namespace dibase { namespace blog {
   namespace sies // Shared Immutable, Exclusive Setup
   {
-    template <template <class T> class SyncPolicy>
+  /// @brief Shared Immutable, Exclusive Setup wrapper around text_info object
+  ///
+  /// Template class parameterised on atomic synchronisation policy and memory
+  /// order parameters passed to a call_context_validator for the this type.
+  ///
+  /// Implements wrapped versions of text_info operations that validate the
+  /// call (thread) context as well as a setup_complete operation that stores
+  /// some cached calculated values and then 'publishes' the object.
+  ///
+  /// @param SyncPolicy Atomic synchronisation policy type template
+  ///                   (e.g.non_atomic, atomic)
+  /// @param M          0+ (typically 0, 1 or 2) std::memory_oder values
+  ///                   passed to the SyncPolicy template type.
+    template 
+    < template <class T, std::memory_order...> class SyncPolicy
+    , std::memory_order... M
+    >
     class text_registry
     {
-      call_context_validator<text_registry, SyncPolicy>
+      call_context_validator<SyncPolicy, text_registry, M...>
                   validate_usage;
       text_info   data;
       
@@ -45,8 +62,8 @@ namespace dibase { namespace blog {
       text_registry(text_registry &&) = delete;
       text_registry & operator=(text_registry &&) = delete;
 
-    /// @brief Called when all muatating calls setting up the object are done.
-    /// Completing setting is considered a mutable operation as it publishes
+    /// @brief Called when all mutating calls setting up the object are done.
+    /// Completing setup is considered a mutable operation as it publishes
     /// all updates and may perform final cached value calculating operations.
     /// @throws dibase::blog::sies::call_context_violation if called by
     ///         thread other than the creator thread or if the object

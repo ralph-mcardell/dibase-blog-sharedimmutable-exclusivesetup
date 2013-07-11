@@ -25,60 +25,66 @@ namespace dibase { namespace blog {
   /// This policy can be used to see the effects of not having any atomic
   /// or memory sychronisation at all.
   ///
-  /// @param T    Type of data supposedly to have synchronisaed access.
+  /// @param T    Type of data supposedly to have synchronised access.
   ///             Expected to be a pointer, bool or integer type.
     template <typename T>
     class non_atomic
     {
       T data;
     public:
+    /// @brief construct from initial value by value
+    /// @param d  Initial value of contained data object
       explicit non_atomic(T d) : data{d} {}
       non_atomic() = delete;
       non_atomic(non_atomic const &) = delete;
       non_atomic & operator=(non_atomic const &) = delete;
       non_atomic & operator=(non_atomic const &) volatile = delete;
+
+    /// @brief Pseudo atomic store operation
+    /// @param  d New value for contained object.
       void store(T d)   {data = d;}
+
+    /// @brief Pseudo atomic load operation
+    /// @returns  Current value of contained object
       T    load() const {return data;}
     };
 
   /// @brief Synchonisation policy wrapping std::atomic behaviours.
   ///
   /// This policy can be used to see the effects of using a std::atomic with
-  /// the various memory order sychronisation settings.
+  /// the various memory order sychronisation values.
   ///
-  /// Outer wrapper specifies memory order synchronisation
-  /// @param StoreOrder One of the std::meory_order enumeration values
+  /// @param T          Type of data supposedly to have synchronisaed access.
+  ///                   Expected to be a pointer, bool or integer type.
+  /// @param StoreOrder One of the std::memory_order enumeration values
   ///                   relevant to atomic store operations.
-  /// @param LoadOrder  One of the std::meory_order enumeration values
+  /// @param LoadOrder  One of the std::memory_order enumeration values
   ///                   relevant to atomic load operations.
     template
-    < std::memory_order StoreOrder
+    < typename T
+    , std::memory_order StoreOrder
     , std::memory_order LoadOrder=StoreOrder
     >
-    struct memory_order
+    class atomic
     {
-    /// @brief Synchonisation policy wrapping std::atomic behaviours.
-    ///
-    /// Inner wrapper specifies type having atomic properties.
-    /// This policy can be used to see the effects of using a std::atomic.
-    ///
-    /// @param T          Type of data supposedly to have synchronisaed access.
-    ///                   Expected to be a pointer, bool or integer type.
-      template
-      < typename T
-      >
-      class atomic
-      {
-        std::atomic<T> data;
-      public:
-        explicit atomic(T d) : data{d} {}
-        atomic() = delete;
-        atomic(atomic const &) = delete;
-        atomic & operator=(atomic const &) = delete;
-        atomic & operator=(atomic const &) volatile = delete;
-        void store(T d)   {data.store(d,StoreOrder);}
-        T    load() const {return data.load(LoadOrder);}
-      };
+      std::atomic<T> data;
+    public:
+    /// @brief construct from initial value by value
+    /// @param d  Initial value of atomic data object
+      explicit atomic(T d) : data{d} {}
+
+      atomic() = delete;
+      atomic(atomic const &) = delete;
+      atomic & operator=(atomic const &) = delete;
+      atomic & operator=(atomic const &) volatile = delete;
+
+    /// @brief Atomic store operation using StoreOrder memory order.
+    /// @param  d New value to atomically object.
+      void store(T d)   {data.store(d,StoreOrder);}
+
+    /// @brief Atomic load operation using LoadOrder memory order.
+    /// @returns  Atomically loaded value
+      T    load() const {return data.load(LoadOrder);}
     };
   } // namespace sies
 }} // namespaces dibase::blog

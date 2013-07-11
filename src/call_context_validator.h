@@ -54,18 +54,32 @@ namespace dibase { namespace blog {
   /// member - that is the validation and publishing services are provided by
   /// composition rather than by inheritance.
   ///
-  /// @param T            The type to be validated, intended to be the
-  ///                     containing type.
   /// @param AtomicPolicy The atomic synchronisation policy used for the
-  ///                     published 'flag'. Needs to accept T* as its U
-  ///                     template parameter.
-    template <class T, template <class U> class AtomicPolicy>
+  ///                     published 'flag'. Needs to accept T* as its first,
+  ///                     type, template parameter and optionally one or
+  ///                     more (typically 2) std::memory_order values.
+  /// @param T            The type to be validated, intended to be the
+  ///                     containing type, pointer tothis type used with
+  ///                     AtomicPolicy.
+  /// @param M            Zero or more memory order parameters.
+  ///                     Typical number of values are: 
+  ///                     0 : for non atomic, synchronising, pseudo policies.
+  ///                     1 : Load and store have same memory order values
+  ///                     2 : Store and load have different memory order values.
+    template 
+    < template <class, std::memory_order...> class AtomicPolicy
+    , class T
+    , std::memory_order... M
+    >
     class call_context_validator
     {
-      AtomicPolicy<T*>  published_;
-      std::thread::id   update_id;
+      AtomicPolicy<T*, M...>  published_;
+      std::thread::id         update_id;
 
     public:
+    /// @brief Construct. 
+    /// Initialise atomic published pointer 'flag' to null pointer and update
+    /// thread id to the constructor calling thread's id.
       call_context_validator()
       : published_{nullptr}
       , update_id{std::this_thread::get_id()}
@@ -76,22 +90,36 @@ namespace dibase { namespace blog {
       call_context_validator(call_context_validator &&) = delete;
       call_context_validator& operator=(call_context_validator &&) = delete;
 
+    /// @brief Publish object making it immutable with shared thread access.
+    /// @param that   this pointer of containing validated object .
+    /// @throws dibase::blog::sies::call_context_violation if called by
+    ///         thread other than the creator thread or if the object
+    ///         has already been published.
       void publish(T* that)
       {
         (*this)(that);
         published_.store(that);
       }
 
+    /// @bried Unvalidated query to see if object in published state.
+    /// @returns true if object has been published, false otherwise
       bool published() const
       {
         return published_.load();
       }
 
+    /// @bried Unvalidated query to see if object is not in published state.
+    /// @returns true if object has NOT been published, false otherwise
       bool unpublished() const
       {
         return !published_.load();
       }
 
+    /// @brief Perform validation for mutating operations of validated object.
+    /// @param  this pointer of containing validated object (not used).
+    /// @throws dibase::blog::sies::call_context_violation if called by
+    ///         thread other than the creator thread or if the object
+    ///         has been published.
       void operator()(T*) const
       {
         if ( published()
@@ -106,6 +134,11 @@ namespace dibase { namespace blog {
           }
       }
 
+    /// @brief Perform validation for non-mutating operations of validated object.
+    /// @param  this pointer of containing validated object (not used).
+    /// @throws dibase::blog::sies::call_context_violation if called by
+    ///         thread other than the creator thread unless the object
+    ///         has been published.
       void operator()(T const *) const
       {
         if (unpublished()

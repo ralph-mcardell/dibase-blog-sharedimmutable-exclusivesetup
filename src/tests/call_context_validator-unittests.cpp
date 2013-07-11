@@ -29,7 +29,7 @@ struct no_sync
 
 class test_type
 {
-  call_context_validator<test_type, no_sync> validate_usage;
+  call_context_validator<no_sync, test_type> validate_usage;
   std::string data;
 
 public:
