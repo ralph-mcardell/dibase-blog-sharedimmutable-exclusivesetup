@@ -17,6 +17,7 @@
 /// @author Ralph E. McArdell
 
 #include "random_in_range.h"
+#include "task.h"
 #include "logger.h"
 #include "text_info.h"
 #include "text_registry.h"
@@ -79,26 +80,6 @@ std::unique_ptr<text_info> rnd_text_info_maker::operator()()
     }
   return pti;
 }
-
-class task
-{
-  logger      log;
-  std::thread thread;
-public:
-  template <class F, class ...Args> 
-  explicit task(F&& f, Args&&... args)
-  : thread{f, std::ref(log), args...}
-  {}
-  task(task const &) = delete;
-  task & operator=(task const &) = delete;
-  task(task &&) = delete;
-  task & operator=(task &&) = delete;
-
-  ~task()
-  {
-    thread.join();
-  }
-};
 
 typedef std::unique_ptr<task>             task_ptr;
 
