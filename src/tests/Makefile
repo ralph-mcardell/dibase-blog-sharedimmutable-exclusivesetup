@@ -17,7 +17,8 @@ UNITTEST_SRC_FILE = text_info-unittests.cpp\
                     atomic-policies-unittests.cpp\
                     text_registry-unittests.cpp\
                     logger-unittests.cpp\
-                    random_in_range-unittests.cpp
+                    random_in_range-unittests.cpp\
+                    task-unittests.cpp
 ALL_SRC_FILES = $(COMMON_SRC_FILES) $(INTERACTIVETEST_SRC_FILES) \
           $(SYSTEST_SRC_FILES) $(UNITTEST_SRC_FILE)
 
