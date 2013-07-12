@@ -81,7 +81,15 @@ std::unique_ptr<text_info> rnd_text_info_maker::operator()()
   return pti;
 }
 
-typedef std::unique_ptr<task>             task_ptr;
+struct clog_task : task
+{
+  template <class F, class ...Args> 
+  explicit clog_task(F&& f, Args&&... args)
+  : task{std::clog, f, args...}
+  {}
+};
+
+typedef std::unique_ptr<clog_task>  task_ptr;
 
 // Unsynchronised access type aliases - should produce some race condition
 // problems but seem not to on x86-64 VMWare 9 VM having 2 processors with 4
@@ -236,11 +244,11 @@ int main()
           {
             if (i==creator_thread_idx)
               {
-                tasks.push_back(task_ptr{new task{creator, pti.get(), std::ref(data)}});
+                tasks.push_back(task_ptr{new clog_task{creator, pti.get(), std::ref(data)}});
               }
             else
               {
-                tasks.push_back(task_ptr{new task{reader, pti.get(), std::ref(data)}});
+                tasks.push_back(task_ptr{new clog_task{reader, pti.get(), std::ref(data)}});
               }
           }
       }

@@ -1,4 +1,4 @@
-/// Project: Shared immutable, exclusive setup blog support code C++ library
+// Project: Shared immutable, exclusive setup blog support code C++ library
 /// @file task.h
 /// @brief Simple task type for experiment apps: joinable thread with logger.
 ///
@@ -23,15 +23,16 @@ namespace dibase { namespace blog {
   /// Only constructable from suitable task function accepting the logger
   /// instance member as its first argument - by non-const reference.
   ///
-  /// A task object joins its thread on destruction, afterwhich, on
-  /// destruction of its logger, will write the logger's logged text to
-  /// the loggers default output stream (std::clog).
+  /// A task object joins its thread on destruction, after which, on
+  /// destruction of its logger, it will write the logger's logged text to
+  /// the logger's output stream.
     class task
     {
       logger      log;
       std::thread thread;
+
     public:
-    /// @brief Construct from task function.
+    /// @brief Construct from log output stream and task function.
     ///
     /// Member function template constructor
     ///
@@ -44,11 +45,13 @@ namespace dibase { namespace blog {
     /// @param (template) F     Task function type
     /// @param (template) Args  Optional 2nd+ task function argument types
     ///                         parameter pack
+    /// @param logstrm          Output stream to log messages to on destruction.
     /// @param f                Task function.
     /// @param args             Task function optional 2nd+ arguments
       template <class F, class ...Args> 
-      explicit task(F&& f, Args&&... args)
-      : thread{f, std::ref(log), args...}
+      task(std::ostream & logstrm, F&& f, Args&&... args)
+      : log{logstrm}
+      , thread{f, std::ref(log), args...}
       {}
 
       task(task const &) = delete;
