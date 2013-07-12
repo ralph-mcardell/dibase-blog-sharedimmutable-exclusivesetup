@@ -62,7 +62,7 @@ namespace dibase { namespace blog {
     /// @brief Join task thread to wait for it to complete
     ///
     /// After task thread join returns logger destructor will cause any logged
-    /// text to be output to the default logger stream (std::clog).
+    /// text to be output to the logger's stream.
       ~task()
       {
         thread.join();
