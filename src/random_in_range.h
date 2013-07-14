@@ -26,12 +26,11 @@ namespace dibase { namespace blog {
       distribution_type           distribution;
       std::shared_ptr<prng_type>  prng;
 
-      void init_prng()
+      static std::chrono::high_resolution_clock::rep
+      ticks()
       {
-        auto ticks(std::chrono::high_resolution_clock::now().time_since_epoch().count());
-        volatile unsigned int sum{0U};//hint to any overzealous optimisations! 
-        for (auto i=ticks&0x3ffU; i!=0; --i)
-          sum += distribution(*prng);
+        using std::chrono::high_resolution_clock;
+        return high_resolution_clock::now().time_since_epoch().count();
       }
 
     public:
@@ -43,8 +42,8 @@ namespace dibase { namespace blog {
       random_in_range(unsigned int min, unsigned int max)
       : distribution{min, max}
       , prng{std::make_shared<prng_type>
-                  ((static_cast<unsigned int>(std::time(nullptr)) )) }
-      {init_prng();}
+                  ((static_cast<unsigned int>(ticks()) )) }
+      {}
 
     /// @brief Construct from existing random_in_range & range [min,max] values.
     /// Creates a random_in_range object that shares a PRNG with an existing

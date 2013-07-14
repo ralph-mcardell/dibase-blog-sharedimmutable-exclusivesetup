@@ -122,8 +122,8 @@ TEST_CASE("blog/sies/random_in_range/initial values"
   auto const Max(1000U);
   auto const NumSamples(1000U);
   auto const Range(Max-Min);
-  auto const MinimumDistinctValues(NumSamples/10);
-  auto const MaximumValueRepeats(NumSamples/20);
+  auto const MinimumDistinctValues(NumSamples/100);
+  auto const MaximumValueRepeats(NumSamples/10);
 
   unsigned int value_count[Range];
   for (auto & vc : value_count)
