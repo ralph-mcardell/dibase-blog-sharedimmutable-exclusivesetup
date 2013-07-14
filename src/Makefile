@@ -9,7 +9,7 @@ ROOT_DIR = $(realpath $(CURDIR)/..)
 include $(ROOT_DIR)/makeinclude.mak
 
 # Files and directories
-SRC_FILES = text_info.cpp
+SRC_FILES = text_info.cpp rnd_text_info_maker.cpp
 TGT_FILE = $(LIB_DIR)/$(LIB_FILE)
 OBJ_FILES = $(SRC_FILES:%.cpp=$(OBJ_DIR)/%.o)
 OBJ_FILENAMES = $(SRC_FILES:%.cpp=%.o)
@@ -45,3 +45,4 @@ $(OBJ_DIR)/%.o: %.cpp
 	rm -f $@.$$$$
 
 include $(DEP_FILES)
+

@@ -34,9 +34,9 @@ endif
 
 all: lib $(DEP_FILES) $(TGT_FILES)
 
-# Currently tidy does nothing 'cos gmake nicely removes the
-# intermediate files after building that tidy would have removed.
 tidy: 
+	-$(RM) $(OBJ_FILENAMES:%=$(BUILD_DIR)/release/%)
+	-$(RM) $(OBJ_FILENAMES:%=$(BUILD_DIR)/debug/%)
 
 clean: tidy
 	-$(RM) $(TGT_FILES_RELEASE)
@@ -48,21 +48,11 @@ clean: tidy
 lib:
 	$(MAKE) -C $(SRC_DIR) BUILD_CONFIG=$(BUILD_CONFIG) 
 
-#$(UNITTEST_TGT_FILE): OBJ_FILES = $(COMMON_OBJ_FILES) $(UNITTEST_OBJ_FILES)
-#$(UNITTEST_TGT_FILE): $(COMMON_OBJ_FILES) $(UNITTEST_OBJ_FILES)
-#	$(LD) -o $@ $(LD_ARGS)
-
-#$(EXEC_DIR)/%$(FILE_SUFFIX): OBJ_FILES = $(COMMON_OBJ_FILES)
 $(EXEC_DIR)/%$(FILE_SUFFIX): $(OBJ_DIR)/%.o $(LIB_DIR)/$(LIB_FILE)
 	$(LD) -o $@ $(LD_ARGS)
 
-#	$(LD) $(LD_FLAGS) -o $@ $< $(LIB_DIR)/$(LIB_FILE) -lpthread
-
 $(OBJ_DIR)/%.o: %.cpp
 	$(CC) $(COMPILE_FLAGS) -I./.. -o $@ $< -pthread 
-
-#	$(CC) $(COMPILE_FLAGS) -I./.. -I$(EXT_PACKAGES_DIR)/Catch/single_include -o $@ $<
-
 
 %.d: %.cpp
 	@set -e; rm -f $@; \
