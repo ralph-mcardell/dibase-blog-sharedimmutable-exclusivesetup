@@ -28,8 +28,9 @@ namespace dibase { namespace blog {
 
       void init_prng()
       {
-        unsigned int sum{0U};
-        for (auto i=std::time(nullptr)&0xfU; i!=0; --i)
+        auto ticks(std::chrono::high_resolution_clock::now().time_since_epoch().count());
+        volatile unsigned int sum{0U};//hint to any overzealous optimisations! 
+        for (auto i=ticks&0x3ffU; i!=0; --i)
           sum += distribution(*prng);
       }
 
@@ -57,7 +58,7 @@ namespace dibase { namespace blog {
       )
       : distribution{min, max}
       , prng{other.prng}
-      {init_prng();}
+      {}
 
       random_in_range(random_in_range const &) = delete;
       random_in_range & operator=(random_in_range const &) = delete;

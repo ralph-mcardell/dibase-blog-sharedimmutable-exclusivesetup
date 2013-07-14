@@ -12,6 +12,8 @@
 #include "random_in_range.h"
 #include "catch.hpp"
 #include <cmath>
+#include <algorithm>
+#include <thread>
 
 using namespace dibase::blog::sies;
 
@@ -109,5 +111,37 @@ TEST_CASE("blog/sies/random_in_range/shared prng ctor"
   auto sampled_avg(double(sum)/NumSamples);
 
   CHECK(std::fabs(sampled_avg-ExpectedAvg)<=Tolerance);
+}
+
+TEST_CASE("blog/sies/random_in_range/initial values"
+         , "Different random_in_range objects should give varying initial values"
+           " over time"
+         )
+{
+  auto const Min(10U);
+  auto const Max(1000U);
+  auto const NumSamples(1000U);
+  auto const Range(Max-Min);
+  auto const MinimumDistinctValues(NumSamples/10);
+  auto const MaximumValueRepeats(NumSamples/20);
+
+  unsigned int value_count[Range];
+  for (auto & vc : value_count)
+    vc = 0;
+
+  for ( auto i=0U; i<NumSamples;++i)  
+  { 
+    ++value_count[random_in_range{Min,Max}()-Min];
+    std::this_thread::yield();
+  }
+
+  auto number_of_distinct_values
+       ( std::count_if
+         ( value_count, value_count+Range,[](unsigned int v){return v!=0;})
+       );
+  CHECK(number_of_distinct_values >= MinimumDistinctValues);
+
+  auto maximum_value_count(*std::max_element(value_count,value_count+Range));
+  CHECK(maximum_value_count <= MaximumValueRepeats);
 }
 
