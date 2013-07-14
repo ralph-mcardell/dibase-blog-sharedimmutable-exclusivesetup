@@ -21,7 +21,7 @@ Use:
 
 to build unit tests (requires Catch from philsquared - use 
 
-    git submodule update
+    git submodule update --init
 
 to pull down Catch source).
 
