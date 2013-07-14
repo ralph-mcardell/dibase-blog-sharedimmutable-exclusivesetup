@@ -16,6 +16,7 @@
 /// @copyright Copyright (c) Dibase Limited 2013
 /// @author Ralph E. McArdell
 
+#include "rnd_text_info_maker.h"
 #include "random_in_range.h"
 #include "task.h"
 #include "logger.h"
@@ -30,57 +31,6 @@
 
 using namespace dibase::blog::sies;
 
-std::string const Alphabet("aaaaabbccddeeeeeeeeffgghhiiiijjkkllmmnnoooooppqrrrssssstttttuuuvwxyz");
-
-class rnd_text_info_maker
-{
-  random_in_range rnd_num_text_chunks;
-  random_in_range rnd_num_words;
-  random_in_range rnd_num_chrs_per_word;
-  random_in_range rnd_word_letter;
-
-public:
-  rnd_text_info_maker ( unsigned min_chk, unsigned max_chk
-                      , unsigned min_wds, unsigned max_wds
-                      , unsigned min_chrs, unsigned max_chrs
-                      )
-  : rnd_num_text_chunks{min_chk, max_chk}
-  , rnd_num_words{rnd_num_text_chunks, min_wds, max_wds}
-  , rnd_num_chrs_per_word{rnd_num_text_chunks, min_chrs, max_chrs}
-  , rnd_word_letter{rnd_num_text_chunks, 0U,static_cast<unsigned>(Alphabet.size())-1U}
-  {
-    rnd_num_text_chunks();
-    rnd_num_words();
-    rnd_num_chrs_per_word();
-    rnd_word_letter();
-  }
-  rnd_text_info_maker(rnd_text_info_maker const &) = delete;
-  rnd_text_info_maker & operator=(rnd_text_info_maker const &) = delete;
-  rnd_text_info_maker(rnd_text_info_maker &&) = delete;
-  rnd_text_info_maker & operator=(rnd_text_info_maker &&) = delete;
-
-  std::unique_ptr<text_info> operator()();
-};
-
-std::unique_ptr<text_info> rnd_text_info_maker::operator()()
-{
-  std::unique_ptr<text_info> pti{new text_info};
-  for (auto c = rnd_num_text_chunks(); c!=0; --c)
-    {
-      std::string chunk;
-      for (auto w = rnd_num_words(); w!=0; --w)
-        {
-          for (auto l = rnd_num_chrs_per_word(); l!=0; --l)
-            {
-              chunk += Alphabet[rnd_word_letter()];
-            }
-          chunk += ' ';
-        }
-      pti->add_text_chunk(chunk);
-    }
-  return pti;
-}
-
 struct clog_task : task
 {
   template <class F, class ...Args> 
@@ -94,8 +44,8 @@ typedef std::unique_ptr<clog_task>  task_ptr;
 // Unsynchronised access type aliases - should produce some race condition
 // problems but seem not to on x86-64 VMWare 9 VM having 2 processors with 4
 // cores each running x86-64 Linux, g++ 4.6.3 on a 2*Opteron 4334 Windows 8 host
-//typedef text_registry<non_atomic>       text_registry_type;
-//typedef non_atomic<text_registry_type*> text_registry_ptr;
+typedef text_registry<non_atomic>       text_registry_type;
+typedef non_atomic<text_registry_type*> text_registry_ptr;
 
 // Synchronised access type aliases. In theory should create no race conditions.
 // Creator thread atomically writing to text_registry_ptr should be sufficient
@@ -103,12 +53,12 @@ typedef std::unique_ptr<clog_task>  task_ptr;
 // updates are to memory associated with the one object and its pointer, so
 // a store-release followed by a consume-load should allow readers to see
 // all writes to the object by the creator thread _after_ the store-release.
-typedef text_registry
+/*typedef text_registry
           < atomic
           , std::memory_order_release
           , std::memory_order_consume >                       text_registry_type;
 typedef atomic<text_registry_type*,std::memory_order_relaxed> text_registry_ptr;
-
+*/
 void reader(logger & log, text_info const * p_reference, text_registry_ptr& p_data);
 
 void creator(logger & log, text_info const * p_reference, text_registry_ptr& p_data)
@@ -214,13 +164,14 @@ void reader(logger & log, text_info const * p_reference, text_registry_ptr& p_da
   while (doing);
 }
 
+
 auto const NumberOfRepeats(300U);
-auto const MinThreads(8U);
-auto const MaxThreads(30U);
 auto const MinTextChunks(10U);
 auto const MaxTextChunks(50U);
 auto const MinWordsPerChunk(80U);
 auto const MaxWordsPerChunk(1500U);
+auto const MinThreads(8U);
+auto const MaxThreads(30U);
 auto const MinWordSize(2U);
 auto const MaxWordSize(7U);
 
