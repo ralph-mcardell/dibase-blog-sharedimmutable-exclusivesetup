@@ -26,6 +26,13 @@ namespace dibase { namespace blog {
       distribution_type           distribution;
       std::shared_ptr<prng_type>  prng;
 
+      void init_prng()
+      {
+        unsigned int sum{0U};
+        for (auto i=std::time(nullptr)&0xfU; i!=0; --i)
+          sum += distribution(*prng);
+      }
+
     public:
     /// @brief Construct from range [min,max] values.
     /// Creates a random_in_range object with a new PRNG seeded with the
@@ -36,7 +43,7 @@ namespace dibase { namespace blog {
       : distribution{min, max}
       , prng{std::make_shared<prng_type>
                   ((static_cast<unsigned int>(std::time(nullptr)) )) }
-      {}
+      {init_prng();}
 
     /// @brief Construct from existing random_in_range & range [min,max] values.
     /// Creates a random_in_range object that shares a PRNG with an existing
@@ -50,7 +57,7 @@ namespace dibase { namespace blog {
       )
       : distribution{min, max}
       , prng{other.prng}
-      {}
+      {init_prng();}
 
       random_in_range(random_in_range const &) = delete;
       random_in_range & operator=(random_in_range const &) = delete;
