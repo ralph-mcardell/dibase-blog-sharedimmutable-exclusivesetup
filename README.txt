@@ -15,9 +15,9 @@ model and atomics, as detailed at:
 
     http://gcc.gnu.org/wiki/Atomic/GCCMM
 
-and in fact allows unit tests around atomic and memory order load/store operations
-to pass on the Raspberry Pi which the g++ 4.6.3 default compiler and C++ standard
-library did not.
+Further, unit tests around atomic and memory order load/store operations pass on the
+Raspberry Pi when built using g++ 4.7 that failed when built using the g++ 4.6.3
+default compiler and C++ standard library.
 
 Use:
 
